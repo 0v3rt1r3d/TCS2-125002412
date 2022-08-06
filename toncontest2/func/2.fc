@@ -15,4 +15,5 @@
 
 ;; testable
 (cell, cell) merge_hashmaps(cell dict1, cell dict2) method_id {
+  return (new_dict(), new_dict());
 }
