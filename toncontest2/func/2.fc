@@ -15,5 +15,8 @@
 
 ;; testable
 (cell, cell) merge_hashmaps(cell dict1, cell dict2) method_id {
-  return (new_dict(), new_dict());
+  cell dict1 = new_dict();
+  slice value = begin_cell().store_int(1, 32).end_cell().begin_parse();
+  dict1~idict_set(32, 1, value);
+  return (dict1, new_dict());
 }
