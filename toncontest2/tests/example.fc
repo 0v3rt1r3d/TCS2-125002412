@@ -1,0 +1,61 @@
+[int, tuple, cell, tuple, int] test_ok_data() method_id(0) {
+    cell message = begin_cell()
+            .store_uint(322, 32)
+            .end_cell();
+
+    tuple stack = unsafe_tuple([message.begin_parse()]);
+
+    cell data = begin_cell()
+        .store_uint(0, 64)
+        .end_cell();
+
+    return [0, stack, data, get_c7(), null()];
+}
+
+_ test_ok(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(1) {
+    throw_if(100, exit_code != 0);  ;; unsuccessful
+
+    slice ds = data.begin_parse();
+    int total = ds~load_uint(64);
+
+    throw_if(101, total == 0);  ;; unchanged
+    throw_if(102, total != 322);  ;; incorrect value
+}
+
+[int, tuple, cell, tuple, int] test_fail_wrong_size_data() method_id(2) {
+    cell message = begin_cell()
+            .store_uint(322, 33)  ;; wrong size
+            .end_cell();
+
+    tuple stack = unsafe_tuple([message.begin_parse()]);
+
+    cell data = begin_cell()
+        .store_uint(0, 64)
+        .end_cell();
+
+    return [0, stack, data, get_c7(), null()];
+}
+
+_ test_fail_wrong_size(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(3) {
+    throw_if(exit_code, exit_code != 2);  ;; unsuccessful
+}
+
+[int, tuple, cell, tuple, int] test_get_total_data() method_id(4) {
+    int function_selector = 128253; ;; funtion to run (seqno, check contract.fif)
+    tuple stack = unsafe_tuple([]);
+
+    cell data = begin_cell()
+        .store_uint(437, 64)
+        .end_cell();
+
+    return [function_selector, stack, data, get_c7(), null()];
+}
+
+_ test_get_total(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(5) {
+    throw_if(100, exit_code != 0);  ;; unsuccessful
+
+    dump_stack();
+
+    int return_value = first(stack);
+    throw_if(101, return_value != 437);
+}

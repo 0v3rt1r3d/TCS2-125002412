@@ -1,5 +1,5 @@
-task1:
+example:
   func:
-    - func/task1.func
+    - func/example.fc
   tests:
-    - tests/test1.func
+    - tests/example.fc
