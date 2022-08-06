@@ -1,0 +1,5 @@
+task1:
+  func:
+    - func/task1.func
+  tests:
+    - tests/test1.func
