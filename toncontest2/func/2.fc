@@ -12,11 +12,54 @@
 () recv_internal() {
 }
 
+(int, int) dict_range(cell dict, int key_len) {
+  (int mink, _, int ok) = dict.idict_get_min?(key_len);
+  throw_if(2, ~ ok);
+
+  (int maxk, _, int ok) = dict.idict_get_max?(key_len);
+  throw_if(2, ~ ok);
+
+  return (mink, maxk);
+}
+
 
 ;; testable
 (cell, cell) merge_hashmaps(cell dict1, cell dict2) method_id {
-  cell dict1 = new_dict();
-  slice value = begin_cell().store_int(1, 32).end_cell().begin_parse();
-  dict1~idict_set(32, 1, value);
-  return (dict1, new_dict());
+  ;; Constants
+  int key_len = 256; ;; TODO: try global and const?
+
+  ;; Outputs
+  cell merged = new_dict();
+  cell discarded = new_dict();
+
+  (int mink1, int maxk1) = dict1.dict_range(key_len);
+  (int mink2, int maxk2) = dict2.dict_range(key_len);
+
+  int mink = min(mink1, mink2);
+  int maxk = max(maxk1, maxk2);
+
+  while(mink < maxk) {
+    (int k1, slice v1, int ok1) = dict1.idict_get_next?(key_len, mink);
+    (int k2, slice v2, int ok2) = dict1.idict_get_next?(key_len, mink);
+
+    if (~ ok1 & ~ ok2) {
+      mink = maxk;
+    } else {
+      if (~ ok2 | k1 < k2) {
+        merged~idict_set(key_len, k1, v1);
+        mink = k1;
+      }
+      if (~ ok1 | k1 > k2) {
+        merged~idict_set(key_len, k2, v2);
+        mink = k2;
+      } else { ;; equals
+        merged~idict_set(key_len, k1, v1);
+        discarded~idict_set(key_len, k2, v2);
+        mink = k1;
+      }
+      mink~dump();
+    }
+  }
+
+  return (merged, discarded);
 }
