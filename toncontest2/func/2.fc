@@ -14,10 +14,10 @@
 
 (int, int) dict_range(cell dict, int key_len) {
   (int mink, _, int ok) = dict.idict_get_min?(key_len);
-  throw_if(2, ~ ok);
+  throw_if(100, ~ ok);
 
   (int maxk, _, int ok) = dict.idict_get_max?(key_len);
-  throw_if(2, ~ ok);
+  throw_if(100, ~ ok);
 
   return (mink, maxk);
 }
@@ -25,6 +25,14 @@
 
 ;; testable
 (cell, cell) merge_hashmaps(cell dict1, cell dict2) method_id {
+  ;; Trivial cases
+  if (dict_empty?(dict1)) {
+    return (dict2, null());
+  }
+  if (dict_empty?(dict2)) {
+    return (dict1, null());
+  }
+
   ;; Constants
   int key_len = 256; ;; TODO: try global and const?
 
@@ -38,27 +46,50 @@
   int mink = min(mink1, mink2);
   int maxk = max(maxk1, maxk2);
 
-  while(mink < maxk) {
-    (int k1, slice v1, int ok1) = dict1.idict_get_next?(key_len, mink);
-    (int k2, slice v2, int ok2) = dict1.idict_get_next?(key_len, mink);
+  while(mink <= maxk) {
+    mink~dump();
 
-    if (~ ok1 & ~ ok2) {
-      mink = maxk;
-    } else {
-      if (~ ok2 | k1 < k2) {
+    (int k1, slice v1, int ok1) = dict1.idict_get_nexteq?(key_len, mink);
+    (int k2, slice v2, int ok2) = dict2.idict_get_nexteq?(key_len, mink);
+
+    int continue_flow = true;
+
+    if ((~ ok1) & (~ ok2)) {
+      mink = maxk + 1;
+      continue_flow = false;
+    }
+
+    if (continue_flow & (~ ok1) & ok2) {
+      merged~idict_set(key_len, k2, v2);
+      mink = k2 + 1;
+      continue_flow = false;
+    }
+
+    if (continue_flow & (~ ok2) & ok1) {
+      merged~idict_set(key_len, k1, v1);
+      mink = k1 + 1;
+      continue_flow = false;
+    }
+
+    if (continue_flow & ok1 & ok2) {
+      if (k1 < k2) {
         merged~idict_set(key_len, k1, v1);
-        mink = k1;
+        mink = k1 + 1;
+        continue_flow = false;
       }
-      if (~ ok1 | k1 > k2) {
+      if (k2 < k1) {
         merged~idict_set(key_len, k2, v2);
-        mink = k2;
-      } else { ;; equals
+        mink = k2 + 1;
+        continue_flow = false;
+      }
+      if (k2 == k1) {
         merged~idict_set(key_len, k1, v1);
         discarded~idict_set(key_len, k2, v2);
-        mink = k1;
+        mink = k1 + 1;
+        continue_flow = false;
       }
-      mink~dump();
     }
+    throw_if(100, continue_flow);
   }
 
   return (merged, discarded);

@@ -1,3 +1,10 @@
+int get_single_int(cell dict, int key_len, int key) inline method_id {
+  (slice res, int ok) = dict.idict_get?(key_len, key);
+  throw_if(100, ~ ok);
+  (_, int value) = res.load_int(key_len);
+  return value;
+}
+
 [int, tuple, cell, tuple, int] test1_data() method_id(0) {
 	tuple stack = unsafe_tuple([new_dict(), new_dict()]);
   cell data = begin_cell().end_cell();
@@ -7,16 +14,20 @@
 }
 
 _ test1(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(1) {
-  throw_if(20, ~ cell_null?(stack.at(0)));
-  throw_if(20, ~ cell_null?(stack.at(1)));
+  throw_if(exit_code, exit_code != 0);
+
+  ;; Both merged and discarded are null
+  throw_if(100, ~ cell_null?(stack.at(0)));
+  throw_if(100, ~ cell_null?(stack.at(1)));
 }
 
 [int, tuple, cell, tuple, int] simple_test_data() method_id(2) {
-  slice value1 = begin_cell().store_int(1, 32).end_cell().begin_parse();
-  slice value2 = begin_cell().store_int(2, 32).end_cell().begin_parse();
-  slice value3 = begin_cell().store_int(3, 32).end_cell().begin_parse();
-
   int key_len = 256;
+
+  slice value1 = begin_cell().store_int(1, key_len).end_cell().begin_parse();
+  slice value2 = begin_cell().store_int(2, key_len).end_cell().begin_parse();
+  slice value3 = begin_cell().store_int(3, key_len).end_cell().begin_parse();
+
 
   cell dict1 = new_dict();
   dict1~idict_set(key_len, 1, value1);
@@ -39,19 +50,18 @@ _ simple_test(int exit_code, cell data, tuple stack, cell actions, int gas) meth
   int key_len = 256;
   throw_if(exit_code, exit_code != 0);
 
-  cell merged_d = stack.at(0);
-  cell discarded_d = stack.at(1);
+  cell merged = stack.at(0);
+  cell discarded = stack.at(1);
 
   { ;; Check merged
-    (slice res, _) = merged_d.idict_get?(key_len, 1);
-    (_, int value) = res.load_int(key_len);
-    ;; throw_if(2, value != 1);
+    throw_if(2, merged.get_single_int(key_len, 1) != 1);
+    throw_if(2, merged.get_single_int(key_len, 2) != 2);
+    throw_if(2, merged.get_single_int(key_len, 3) != 3);
+    throw_if(2, merged.get_single_int(key_len, 4) != 3);
   }
 
-
-  ;; { ;; Check discarded
-  ;;   (slice res, _) = merged_d.idict_get?(key_len, 1);
-  ;;   (_, int value) = res.load_int(key_len);
-  ;;   ;; throw_if(2, value != 1);
-  ;; }
+  { ;; Check discarded
+    throw_if(2, discarded.get_single_int(key_len, 1) != 2);
+    throw_if(2, discarded.get_single_int(key_len, 2) != 1);
+  }
 }
