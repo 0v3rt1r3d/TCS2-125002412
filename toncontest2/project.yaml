@@ -1,5 +1,11 @@
-example:
+# example:
+#   func:
+#     - func/example.fc
+#   tests:
+#     - tests/example.fc
+
+task1:
   func:
-    - func/example.fc
+    - func/1.fc
   tests:
-    - tests/example.fc
+    - tests/1.fc
