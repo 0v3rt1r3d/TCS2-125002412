@@ -10,3 +10,4 @@ cp func/5.fc solution/5.fc
 cp participant.json solution/participant.json
 
 tar -zcvf solution.zip solution && rm -rf solution
+mv solution.zip ~/Desktop/solution.zip
