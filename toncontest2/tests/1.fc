@@ -65,3 +65,14 @@ _ test5_ok(int exit_code, cell data, tuple stack, cell actions, int gas) method_
 _ test6_ok(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(11) {
   throw_if(101, first(stack) != 33);  ;; unsuccessful
 }
+
+[int, tuple, cell, tuple, int] test7_data() method_id(12) {
+	tuple stack = unsafe_tuple([17, 344]);
+  cell data = begin_cell().end_cell();
+  int function_selector = 93344;
+  return [function_selector, stack, data, get_c7(), null()];
+}
+
+_ test7_ok(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(13) {
+  throw_if(101, first(stack) != 1);  ;; unsuccessful
+}
