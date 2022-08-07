@@ -10,6 +10,9 @@
 
 ;; testable
 (int) gcd(int a, int b) method_id {
+  if (a == b) {
+    return a;
+  }
   while ((a > 0) & (b > 0)) {
     if (a > b) {
       a = a % b;
