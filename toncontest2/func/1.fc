@@ -10,12 +10,15 @@
 
 ;; testable
 (int) gcd(int a, int b) method_id {
-  while (a != b) {
+  while ((a > 0) & (b > 0)) {
     if (a > b) {
-      a = a - b;
+      a = a % b;
     } else {
-      b = b - a;
+      b = b % a;
     }
+  }
+  if (a == 0) {
+    return b;
   }
   return a;
 }
