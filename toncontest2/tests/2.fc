@@ -132,49 +132,43 @@ _ second_is_empty(int exit_code, cell data, tuple stack, cell actions, int gas) 
 }
 
 
-;; [int, tuple, cell, tuple, int] all_are_intersected_data() method_id(8) {
-;;   int key_len = 256;
+[int, tuple, cell, tuple, int] all_are_intersected_data() method_id(8) {
+  int key_len = 256;
 
-;;   slice value1 = begin_cell().store_int(1, key_len).end_cell().begin_parse();
-;;   slice value2 = begin_cell().store_int(2, key_len).end_cell().begin_parse();
-;;   slice value3 = begin_cell().store_int(3, key_len).end_cell().begin_parse();
+  int i = 10;
 
-;;   cell dict1 = new_dict();
-;;   dict1~idict_set(key_len, 1, value1);
-;;   dict1~idict_set(key_len, 2, value2);
-;;   dict1~idict_set(key_len, 3, value3);
+  cell dict1 = new_dict();
+  cell dict2 = new_dict();
 
-;;   cell dict2 = new_dict();
-;;   dict2~idict_set(key_len, 1, value2);
-;;   dict2~idict_set(key_len, 2, value1);
-;;   dict2~idict_set(key_len, 4, value3);
+  while(i > 0) {
+    i = i - 1;
 
-;; 	tuple stack = unsafe_tuple([dict1, dict2]);
+    dict1~idict_set(key_len, i, cell_with_int(key_len, i * 10).begin_parse());
+    dict2~idict_set(key_len, i, cell_with_int(key_len, i * 20).begin_parse());
+  }
 
-;;   cell data = begin_cell().end_cell();
-;;   int function_selector = 79555;
-;;   return [function_selector, stack, data, get_c7(), null()];
-;; }
+	tuple stack = unsafe_tuple([dict1, dict2]);
 
-;; _ all_are_intersected(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(9) {
-;;   int key_len = 256;
-;;   throw_if(exit_code, exit_code != 0);
+  cell data = begin_cell().end_cell();
+  int function_selector = 79555;
+  return [function_selector, stack, data, get_c7(), null()];
+}
 
-;;   cell merged = stack.at(0);
-;;   cell discarded = stack.at(1);
+_ all_are_intersected(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(9) {
+  int key_len = 256;
+  throw_if(exit_code, exit_code != 0);
 
-;;   { ;; Check merged
-;;     throw_if(2, merged.get_single_int(key_len, 1) != 1);
-;;     throw_if(2, merged.get_single_int(key_len, 2) != 2);
-;;     throw_if(2, merged.get_single_int(key_len, 3) != 3);
-;;     throw_if(2, merged.get_single_int(key_len, 4) != 3);
-;;   }
+  cell merged = stack.at(0);
+  cell discarded = stack.at(1);
 
-;;   { ;; Check discarded
-;;     throw_if(2, discarded.get_single_int(key_len, 1) != 2);
-;;     throw_if(2, discarded.get_single_int(key_len, 2) != 1);
-;;   }
-;; }
+  int i = 10;
+  while(i > 0) {
+    i = i - 1;
+
+    throw_if(100, merged.get_single_int(key_len, i) != i * 10);
+    throw_if(100, discarded.get_single_int(key_len, i) != i * 20);
+  }
+}
 
 ;; [int, tuple, cell, tuple, int] stress_test_data() method_id(10) {
 ;;   int key_len = 256;
