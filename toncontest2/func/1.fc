@@ -13,15 +13,9 @@
   if (a == b) {
     return a;
   }
-  while ((a > 0) & (b > 0)) {
-    if (a > b) {
-      a = a % b;
-    } else {
-      b = b % a;
-    }
-  }
-  if (a == 0) {
-    return b;
+  while (b != 0) {
+    (a, b) = minmax(a, b);
+    b = b % a;
   }
   return a;
 }
