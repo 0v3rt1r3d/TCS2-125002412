@@ -14,8 +14,8 @@
     return a;
   }
   while (b) {
-    (a, b) = minmax(a, b);
-    b = b % a;
+    a %= b;
+    (a, b) = (b, a);
   }
   return a;
 }
