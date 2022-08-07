@@ -4,14 +4,14 @@
 #   tests:
 #     - tests/example.fc
 
-# task1:
-#   func:
-#     - func/1.fc
-#   tests:
-#     - tests/1.fc
-
-task2:
+task1:
   func:
-    - func/2.fc
+    - func/1.fc
   tests:
-    - tests/2.fc
+    - tests/1.fc
+
+# task2:
+#   func:
+#     - func/2.fc
+#   tests:
+#     - tests/2.fc
