@@ -42,7 +42,7 @@
   int mink = min(mink1, mink2);
   int maxk = max(maxk1, maxk2);
 
-  while(mink <= maxk) {
+  while (mink <= maxk) {
     (int k1, slice v1, int ok1) = dict1.idict_get_nexteq?(key_len, mink);
     (int k2, slice v2, int ok2) = dict2.idict_get_nexteq?(key_len, mink);
 
