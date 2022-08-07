@@ -42,3 +42,26 @@ _ test3_ok(int exit_code, cell data, tuple stack, cell actions, int gas) method_
 _ test4_ok(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(7) {
   throw_if(101, first(stack) != 21);  ;; unsuccessful
 }
+
+
+[int, tuple, cell, tuple, int] test5_data() method_id(8) {
+	tuple stack = unsafe_tuple([1048573, 1048575]);
+  cell data = begin_cell().end_cell();
+  int function_selector = 93344;
+  return [function_selector, stack, data, get_c7(), null()];
+}
+
+_ test5_ok(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(9) {
+  throw_if(101, first(stack) != 1);  ;; unsuccessful
+}
+
+[int, tuple, cell, tuple, int] test6_data() method_id(10) {
+	tuple stack = unsafe_tuple([25509, 1048575]);
+  cell data = begin_cell().end_cell();
+  int function_selector = 93344;
+  return [function_selector, stack, data, get_c7(), null()];
+}
+
+_ test6_ok(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(11) {
+  throw_if(101, first(stack) != 33);  ;; unsuccessful
+}
