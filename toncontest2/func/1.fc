@@ -13,7 +13,7 @@
   if (a == b) {
     return a;
   }
-  while (b != 0) {
+  while (b) {
     (a, b) = minmax(a, b);
     b = b % a;
   }
