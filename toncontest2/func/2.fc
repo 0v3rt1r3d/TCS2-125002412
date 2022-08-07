@@ -83,7 +83,7 @@
         continue_flow = false;
       }
     }
-    throw_if(100, continue_flow);
+    ;; throw_if(2, continue_flow);
   }
 
   return (merged, discarded);
