@@ -23,76 +23,137 @@
   Intermediate representation can be arbitrary.
 -}
 
-
 () recv_internal() {
 }
 
-;; testable
-(cell) serialize(tuple values) method_id {
+;; ;; ==== Illustrative material ====
+;; builder serialize_element(builder b, var x) {
+;;   if(is_null(x)) {
+;;     b~store_uint(0,3);
+;;   }
+;;   if(is_int(x)) {
+;;     ;; before this point compiler do not know true type of x
+;;     ;; force it to be int
+;;     int i_x = force_cast_to_int(x);
+;;     b = b.store_uint(1,3).store_int(i_x, 257);
+;;   }
+;;   if(is_cell(x)) {
+;;     ;; before this point compiler do not know true type of x
+;;     ;; force it to be cell
+;;     cell c_x = force_cast_to_cell(x);
+;;     b = b.store_uint(2,3).store_ref(c_x);
+;;   }
+;;   if(is_slice(x)) {
+;;     ;; before this point compiler do not know true type of x
+;;     ;; force it to be slice
+;;     slice s_x = force_cast_to_slice(x);
+;;     b = b.store_uint(3,3).store_ref(begin_cell().store_slice(s_x).end_cell());
+;;   }
+;;   return b;
+;; }
+
+;; (slice, tuple) deserialize_element_to_tuple(slice s, tuple t) {
+;;   int element_type = s~load_uint(3);
+;;   if(element_type == 0) {
+;;     t~tpush(null());
+;;   }
+;;   if(element_type == 1) {
+;;     t~tpush(s~load_int(257));
+;;   }
+;;   if(element_type == 2) {
+;;     t~tpush(s~load_ref());
+;;   }
+;;   if(element_type == 3) {
+;;     t~tpush(s~load_ref().begin_parse());
+;;   }
+;;   return (s,t);
+;; }
+
+;; cell serialize_t3(tuple three_elements) method_id {
+;;   throw_unless(777, tuple_length(three_elements) == 3);
+;;   builder srl = begin_cell();
+;;   srl = serialize_element(srl, three_elements.first());
+;;   srl = serialize_element(srl, three_elements.second());
+;;   srl = serialize_element(srl, three_elements.third());
+;;   return srl.end_cell();
+;; }
+
+;; tuple deserialize_t3(cell sc) method_id {
+;;   slice s = sc.begin_parse();
+;;   tuple t = empty_tuple();
+;;   repeat (3) {
+;;     (s,t) = deserialize_element_to_tuple(s,t);
+;;   }
+;;   return t;
+;; }
+
+() serialize_tuple(builder b, tuple tup, int rec_level) {
+  throw_if(100, rec_level == 0); ;; Draw attention
+  int tup_size = tup.tuple_length();
+  b~store_uint(tup_size, 8);
+  int i = 0;
+  while(i < tup_size) {
+    var x = tup.at(i);
+
+    if(is_null(x)) {
+      b~store_uint(0,3);
+    }
+    if(is_int(x)) {
+      int i_x = force_cast_to_int(x);
+      b = b.store_uint(1,3).store_int(i_x, 257);
+    }
+    if(is_cell(x)) {
+      cell c_x = force_cast_to_cell(x);
+      b = b.store_uint(2,3).store_ref(c_x);
+    }
+    if(is_slice(x)) {
+      slice s_x = force_cast_to_slice(x);
+      b = b.store_uint(3,3).store_ref(begin_cell().store_slice(s_x).end_cell());
+    }
+    if(is_tuple(x)) {
+      tuple new_tup = force_cast_to_tuple(x);
+      serialize_tuple(b.store_uint(4, 3), new_tup, rec_level - 1);
+    }
+  }
 }
 
-;; testable
-(tuple) deserialize(cell serialized) method_id {
-}
-
-;; ==== Illustrative material ====
-builder serialize_element(builder b, var x) {
-  if(is_null(x)) {
-    b~store_uint(0,3);
-  }
-  if(is_int(x)) {
-    ;; before this point compiler do not know true type of x
-    ;; force it to be int
-    int i_x = force_cast_to_int(x);
-    b = b.store_uint(1,3).store_int(i_x, 257);
-  }
-  if(is_cell(x)) {
-    ;; before this point compiler do not know true type of x
-    ;; force it to be cell
-    cell c_x = force_cast_to_cell(x);
-    b = b.store_uint(2,3).store_ref(c_x);
-  }
-  if(is_slice(x)) {
-    ;; before this point compiler do not know true type of x
-    ;; force it to be slice
-    slice s_x = force_cast_to_slice(x);
-    b = b.store_uint(3,3).store_ref(begin_cell().store_slice(s_x).end_cell());
-  }
-  return b;
-}
-
-(slice, tuple) deserialize_element_to_tuple(slice s, tuple t) {
-  int element_type = s~load_uint(3);
-  if(element_type == 0) {
-    t~tpush(null());
-  }
-  if(element_type == 1) {
-    t~tpush(s~load_int(257));
-  }
-  if(element_type == 2) {
-    t~tpush(s~load_ref());
-  }
-  if(element_type == 3) {
-    t~tpush(s~load_ref().begin_parse());
-  }
-  return (s,t);
-}
-
-cell serialize_t3(tuple three_elements) method_id {
-  throw_unless(777, three_elements.tuple_length() == 3);
-  builder srl = begin_cell();
-  srl = serialize_element(srl, three_elements.first());
-  srl = serialize_element(srl, three_elements.second());
-  srl = serialize_element(srl, three_elements.third());
-  return srl.end_cell();
-}
-
-tuple deserialize_t3(cell sc) method_id {
-  slice s = sc.begin_parse();
-  tuple t = empty_tuple();
-  repeat (3) {
-    (s,t) = deserialize_element_to_tuple(s,t);
+(tuple) deserialize_tuple(slice s, tuple t) {
+  int tup_size = s~load_uint(3);
+  repeat(tup_size) {
+    int element_type = s~load_uint(3);
+    if(element_type == 0) {
+      t~tpush(null());
+    }
+    if(element_type == 1) {
+      t~tpush(s~load_int(257));
+    }
+    if(element_type == 2) {
+      t~tpush(s~load_ref());
+    }
+    if(element_type == 3) {
+      t~tpush(s~load_ref().begin_parse());
+    }
+    if (element_type == 4) {
+      t = deserialize_tuple(s, t);
+    }
   }
   return t;
 }
 
+;; testable
+(cell) serialize(tuple values) method_id {
+  builder b = begin_cell();
+  serialize_tuple(b, values, 4);
+  return b.end_cell();
+}
+
+;; testable
+(tuple) deserialize(cell serialized) method_id {
+  slice s = serialized.begin_parse();
+  tuple t = empty_tuple();
+  return deserialize_tuple(s, t);
+}
+
+tuple check(tuple input) {
+  return deserialize(serialize(input));
+}
