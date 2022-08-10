@@ -87,13 +87,22 @@
 ;;   return t;
 ;; }
 
-(builder) serialize_tuple(builder b, tuple tup, int rec_level) {
+
+;; tuple: amount, next or null
+;; any: type, link (mb to tuple), next or null
+
+
+(cell) serialize_tuple(tuple tup, int rec_level) {
   throw_if(100, rec_level == 0); ;; Draw attention
   int tup_size = tup.tuple_length();
 
-  b~store_uint(tup_size, 8);
+  builder hlb = begin_cell();
+  hlb~store_uint(tup_size, 8);
+  cell prev_cell = null();
+
   int i = 0;
   while(i < tup_size) {
+    builder b = begin_cell();
     var x = tup.at(i);
 
     if(is_null(x)) {
@@ -111,18 +120,40 @@
       slice s_x = force_cast_to_slice(x);
       b = b.store_uint(3,3).store_ref(begin_cell().store_slice(s_x).end_cell());
     }
-    if(is_tuple(x)) {
+
+    if(is_tuple(x)) { ;; Wrong
       tuple new_tup = force_cast_to_tuple(x);
-      b = serialize_tuple(b.store_uint(4, 3), new_tup, rec_level - 1);
+      b = b.store_uint(4,3).store_ref(serialize_tuple(new_tup, rec_level - 1));
     }
+
+    ;; writing is finished
+    if (is_null(prev_cell)) {
+      prev_cell = b.store_int(0, 1).end_cell();
+    } else {
+      prev_cell = b.store_int(1, 1).store_ref(prev_cell).end_cell();
+    }
+
     i += 1;
   }
-  return b;
+  return hlb.store_ref(prev_cell).end_cell();
 }
 
-(slice, tuple) deserialize_tuple(slice s, tuple t) {
-  int tup_size = s~load_uint(8);
-  repeat(tup_size) {
+(tuple) deserialize_tuple(cell c) {
+  tuple t = empty_tuple();
+
+  slice shl = c.begin_parse();
+  int tup_size = shl~load_uint(8);
+
+  if (tup_size == 0) {
+    return empty_tuple();
+  }
+
+  tup_size~dump();
+
+  cell next = shl~load_ref();
+  repeat(tup_size) { ;; amoutn of iterations
+    slice s = next.begin_parse();
+
     int element_type = s~load_uint(3);
     if(element_type == 0) {
       t~tpush(null());
@@ -137,24 +168,34 @@
       t~tpush(s~load_ref().begin_parse());
     }
     if (element_type == 4) {
-      (s, t) = deserialize_tuple(s, t);
+      cell inn_tup = s~load_ref();
+      t~tpush(deserialize_tuple(inn_tup));
+    }
+
+    int has_next = s~load_int(1);
+    has_next~dump();
+    if (has_next) {
+      next = s~load_ref();
     }
   }
-  return (s, t);
+
+  tuple res = empty_tuple();
+  repeat(tup_size) {
+    var poped = t~tpop();
+    res~tpush(poped);
+  }
+
+  return res;
 }
 
 ;; testable
 (cell) serialize(tuple values) method_id {
-  builder b = begin_cell();
-  return serialize_tuple(b, values, 4).end_cell();
+  return serialize_tuple(values, 4); ;; Check latest bits are required
 }
 
 ;; testable
 (tuple) deserialize(cell serialized) method_id {
-  slice s = serialized.begin_parse();
-  tuple t = empty_tuple();
-  (s, t) = deserialize_tuple(s, t);
-  return t;
+  return deserialize_tuple(serialized);
 }
 
 (tuple) check(tuple input) method_id {
