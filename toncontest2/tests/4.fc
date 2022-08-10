@@ -73,15 +73,18 @@ _ ok3(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(5)
 }
 
 [int, tuple, cell, tuple, int] ok4_data() method_id(6) {
-  cell c = begin_cell().end_cell();
+  cell c = begin_cell()
+    .store_int(0, 257)
+    .store_uint(0, 257)
+    .end_cell();
 
   tuple input = empty_tuple();
   input~tpush(10);
   input~tpush(null());
   input~tpush(c);
-  input~tpush(c.begin_parse());
-  input~tpush(c);
-  input~tpush(c);
+  ;; input~tpush(c.begin_parse());
+  ;; input~tpush(c);
+  ;; input~tpush(c.begin_parse());
   ;; input~tpush(10000); ;; TODO: should be more
 
 	tuple stack = unsafe_tuple([input]);
@@ -94,8 +97,8 @@ _ ok4(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(7)
   dump_stack();
   throw_if(100, stack.at(0).at(0) != 10);
   throw_if(100, ~ is_null(stack.at(0).at(1)));
-  throw_if(100, ~ is_cell(stack.at(0).at(2)));
-  throw_if(100, ~ is_slice(stack.at(0).at(3)));
-  throw_if(100, ~ is_cell(stack.at(0).at(4)));
-  throw_if(100, ~ is_cell(stack.at(0).at(5)));
+  ;; throw_if(100, ~ is_cell(stack.at(0).at(2)));
+  ;; throw_if(100, ~ is_slice(stack.at(0).at(3)));
+  ;; throw_if(100, ~ is_cell(stack.at(0).at(4)));
+  ;; throw_if(100, ~ is_slice(stack.at(0).at(5)));
 }
