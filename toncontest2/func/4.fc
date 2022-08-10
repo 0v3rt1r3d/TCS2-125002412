@@ -87,9 +87,10 @@
 ;;   return t;
 ;; }
 
-() serialize_tuple(builder b, tuple tup, int rec_level) {
+(builder) serialize_tuple(builder b, tuple tup, int rec_level) {
   throw_if(100, rec_level == 0); ;; Draw attention
   int tup_size = tup.tuple_length();
+
   b~store_uint(tup_size, 8);
   int i = 0;
   while(i < tup_size) {
@@ -112,13 +113,15 @@
     }
     if(is_tuple(x)) {
       tuple new_tup = force_cast_to_tuple(x);
-      serialize_tuple(b.store_uint(4, 3), new_tup, rec_level - 1);
+      b = serialize_tuple(b.store_uint(4, 3), new_tup, rec_level - 1);
     }
+    i += 1;
   }
+  return b;
 }
 
-(tuple) deserialize_tuple(slice s, tuple t) {
-  int tup_size = s~load_uint(3);
+(slice, tuple) deserialize_tuple(slice s, tuple t) {
+  int tup_size = s~load_uint(8);
   repeat(tup_size) {
     int element_type = s~load_uint(3);
     if(element_type == 0) {
@@ -134,26 +137,26 @@
       t~tpush(s~load_ref().begin_parse());
     }
     if (element_type == 4) {
-      t = deserialize_tuple(s, t);
+      (s, t) = deserialize_tuple(s, t);
     }
   }
-  return t;
+  return (s, t);
 }
 
 ;; testable
 (cell) serialize(tuple values) method_id {
   builder b = begin_cell();
-  serialize_tuple(b, values, 4);
-  return b.end_cell();
+  return serialize_tuple(b, values, 4).end_cell();
 }
 
 ;; testable
 (tuple) deserialize(cell serialized) method_id {
   slice s = serialized.begin_parse();
   tuple t = empty_tuple();
-  return deserialize_tuple(s, t);
+  (s, t) = deserialize_tuple(s, t);
+  return t;
 }
 
-tuple check(tuple input) {
+(tuple) check(tuple input) method_id {
   return deserialize(serialize(input));
 }

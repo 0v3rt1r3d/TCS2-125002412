@@ -1,16 +1,16 @@
 
 [int, tuple, cell, tuple, int] serialize_1_data() method_id(0) {
-	tuple stack = unsafe_tuple([new_dict(), new_dict()]);
-  cell data = begin_cell().end_cell();
+  tuple input = empty_tuple();
+  input~tpush(10);
 
-  int function_selector = 79555;
+	tuple stack = unsafe_tuple([input]);
+  cell data = begin_cell().end_cell();
+  int function_selector = 120880;
   return [function_selector, stack, data, get_c7(), null()];
 }
 
-_ serialize_1(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(1) {
-  ;; throw_if(exit_code, exit_code != 0);
-
-  ;; ;; Both merged and discarded are null
-  ;; throw_if(100, ~ cell_null?(stack.at(0)));
-  ;; throw_if(100, ~ cell_null?(stack.at(1)));
+_ serialize1(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(1) {
+  throw_if(exit_code, exit_code != 0);
+  tuple ret = stack.at(0);
+  ret~dump();
 }
