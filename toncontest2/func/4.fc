@@ -103,7 +103,6 @@
 
   int i = 0;
   while(i < tup_size) {
-    i~dump();
     builder b = begin_cell();
     var x = tup.at(i);
 
@@ -150,8 +149,6 @@
     return empty_tuple();
   }
 
-  tup_size~dump();
-
   cell next = shl~load_ref();
   repeat(tup_size) { ;; amoutn of iterations
     slice s = next.begin_parse();
@@ -175,7 +172,6 @@
     }
 
     int has_next = s~load_uint(1);
-    has_next~dump();
     if (has_next) {
       next = s~load_ref();
     }
