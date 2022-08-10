@@ -57,7 +57,9 @@ _ ok2(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(3)
   input~tpush(10);
   input~tpush(100);
   input~tpush(1000);
-  ;; input~tpush(10000); ;; TODO: should be more
+  input~tpush(10000);
+  input~tpush(100000);
+  input~tpush(1000000);
 
 	tuple stack = unsafe_tuple([input]);
   cell data = begin_cell().end_cell();
@@ -69,36 +71,38 @@ _ ok3(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(5)
   throw_if(100, stack.at(0).at(0) != 10);
   throw_if(100, stack.at(0).at(1) != 100);
   throw_if(100, stack.at(0).at(2) != 1000);
-  ;; throw_if(100, stack.at(0).at(3) != 10000);
+  throw_if(100, stack.at(0).at(3) != 10000);
+  throw_if(100, stack.at(0).at(4) != 100000);
+  throw_if(100, stack.at(0).at(5) != 1000000);
 }
 
-[int, tuple, cell, tuple, int] ok4_data() method_id(6) {
-  cell c = begin_cell()
-    .store_int(0, 257)
-    .store_uint(0, 257)
-    .end_cell();
+;; [int, tuple, cell, tuple, int] ok4_data() method_id(6) {
+;;   cell c = begin_cell()
+;;     .store_int(0, 257)
+;;     .store_uint(0, 257)
+;;     .end_cell();
 
-  tuple input = empty_tuple();
-  input~tpush(10);
-  input~tpush(null());
-  input~tpush(c);
-  ;; input~tpush(c.begin_parse());
-  ;; input~tpush(c);
-  ;; input~tpush(c.begin_parse());
-  ;; input~tpush(10000); ;; TODO: should be more
+;;   tuple input = empty_tuple();
+;;   input~tpush(10);
+;;   input~tpush(null());
+;;   input~tpush(c);
+;;   ;; input~tpush(c.begin_parse());
+;;   ;; input~tpush(c);
+;;   ;; input~tpush(c.begin_parse());
+;;   ;; input~tpush(10000); ;; TODO: should be more
 
-	tuple stack = unsafe_tuple([input]);
-  cell data = begin_cell().end_cell();
-  int function_selector = 120880;
-  return [function_selector, stack, data, get_c7(), null()];
-}
+;; 	tuple stack = unsafe_tuple([input]);
+;;   cell data = begin_cell().end_cell();
+;;   int function_selector = 120880;
+;;   return [function_selector, stack, data, get_c7(), null()];
+;; }
 
-_ ok4(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(7) {
-  dump_stack();
-  throw_if(100, stack.at(0).at(0) != 10);
-  throw_if(100, ~ is_null(stack.at(0).at(1)));
-  ;; throw_if(100, ~ is_cell(stack.at(0).at(2)));
-  ;; throw_if(100, ~ is_slice(stack.at(0).at(3)));
-  ;; throw_if(100, ~ is_cell(stack.at(0).at(4)));
-  ;; throw_if(100, ~ is_slice(stack.at(0).at(5)));
-}
+;; _ ok4(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(7) {
+;;   dump_stack();
+;;   throw_if(100, stack.at(0).at(0) != 10);
+;;   throw_if(100, ~ is_null(stack.at(0).at(1)));
+;;   ;; throw_if(100, ~ is_cell(stack.at(0).at(2)));
+;;   ;; throw_if(100, ~ is_slice(stack.at(0).at(3)));
+;;   ;; throw_if(100, ~ is_cell(stack.at(0).at(4)));
+;;   ;; throw_if(100, ~ is_slice(stack.at(0).at(5)));
+;; }

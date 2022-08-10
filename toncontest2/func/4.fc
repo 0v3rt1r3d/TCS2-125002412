@@ -98,10 +98,12 @@
 
   builder hlb = begin_cell();
   hlb~store_uint(tup_size, 8);
-  cell prev_cell = null();
+
+  builder prev_cell = begin_cell();
 
   int i = 0;
   while(i < tup_size) {
+    i~dump();
     builder b = begin_cell();
     var x = tup.at(i);
 
@@ -127,15 +129,15 @@
     }
 
     ;; writing is finished
-    if (is_null(prev_cell)) {
-      prev_cell = b.store_int(0, 1).end_cell();
+    if (i == 0) {
+      prev_cell = b.store_uint(0, 1);
     } else {
-      prev_cell = b.store_int(1, 1).store_ref(prev_cell).end_cell();
+      prev_cell = b.store_uint(1, 1).store_maybe_ref(prev_cell.end_cell());
     }
 
     i += 1;
   }
-  return hlb.store_ref(prev_cell).end_cell();
+  return hlb.store_ref(prev_cell.end_cell()).end_cell();
 }
 
 (tuple) deserialize_tuple(cell c) {
@@ -172,7 +174,7 @@
       t~tpush(deserialize_tuple(inn_tup));
     }
 
-    int has_next = s~load_int(1);
+    int has_next = s~load_uint(1);
     has_next~dump();
     if (has_next) {
       next = s~load_ref();
