@@ -13,4 +13,6 @@
 
 ;; testable
 (slice) encode_address(slice Address) method_id {
+  tuple parsed = parse_addr(Address);
+  return null();
 }

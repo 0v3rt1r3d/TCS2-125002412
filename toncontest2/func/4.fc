@@ -132,6 +132,7 @@
       prev_cell = b.store_uint(0, 1);
     } else {
       prev_cell = b.store_uint(1, 1).store_maybe_ref(prev_cell.end_cell());
+      prev_cell = b.store_int(1, 1).store_maybe_ref(prev_cell.end_cell());
     }
 
     i += 1;

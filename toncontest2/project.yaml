@@ -16,9 +16,16 @@
 #   tests:
 #     - tests/2.fc
 
-task4:
+# task4:
+#   func:
+#     - func/typehelpers.fc
+#     - func/4.fc
+#   tests:
+#     - tests/4.fc
+
+task5:
   func:
     - func/typehelpers.fc
-    - func/4.fc
+    - func/5.fc
   tests:
-    - tests/4.fc
+    - tests/5.fc
